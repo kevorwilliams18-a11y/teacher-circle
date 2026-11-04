@@ -1,0 +1,11 @@
+create table public.game_responses (user_id uuid primary key references auth.users(id) on delete cascade, email text not null check(char_length(email)<=254), answers jsonb not null check(jsonb_typeof(answers)='array' and jsonb_array_length(answers)=10 and octet_length(answers::text)<20000), updated_at timestamptz not null default now());
+alter table public.game_responses enable row level security;
+revoke all on public.game_responses from anon, authenticated;
+grant select,insert,update on public.game_responses to authenticated;
+create function public.is_teacher_host() returns boolean language sql stable security definer set search_path='' as $$ select exists(select 1 from auth.users where id=(select auth.uid()) and lower(email)='REPLACE_WITH_HOST_EMAIL' and email_confirmed_at is not null); $$;
+revoke all on function public.is_teacher_host() from public;
+grant execute on function public.is_teacher_host() to authenticated;
+create policy "Read own answers or host results" on public.game_responses for select to authenticated using(user_id=(select auth.uid()) or (select public.is_teacher_host()));
+create policy "Verified teachers submit own answers" on public.game_responses for insert to authenticated with check(user_id=(select auth.uid()) and email=(select auth.jwt()->>'email'));
+create policy "Teachers update own answers" on public.game_responses for update to authenticated using(user_id=(select auth.uid())) with check(user_id=(select auth.uid()) and email=(select auth.jwt()->>'email'));
+revoke all on function public.is_teacher_host() from anon;

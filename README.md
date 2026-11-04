@@ -1,24 +1,17 @@
 # Teacher Circle
 
-A responsive teacher icebreaker with email magic-link sign-in, one editable response per teacher, and a host dashboard. Authentication and database authorization use Supabase. The static website deploys to GitHub Pages.
+Live site: https://kevorwilliams18-a11y.github.io/teacher-circle/
 
-## Connect a new Supabase project
+A funny Would You Rather game for teachers with 10 shuffled rounds, email magic-link sign-in, private response storage, and a host results dashboard.
 
-1. Create a Supabase project in your account. Run `supabase.sql` in its SQL editor.
-2. Put the project URL and public publishable/anon key in `config.js`. Never put a service-role key or database password in the website or repository.
-3. Enable email authentication, keep email confirmation enabled, and configure an SMTP sender for real participants. Configure the email template to send a magic link.
-4. Set the Authentication Site URL and allowed redirect URL to the exact deployed GitHub Pages URL, including its repository path and trailing slash.
-5. Sign in with the intended host email once. Run the final commented query in `supabase.sql`, replacing YOUR_VERIFIED_EMAIL with the host's email, to grant access only to that verified account.
-6. Verify with two separate accounts: the host must see both submissions; a teacher must be unable to query another teacher's submission or add host accounts. Signed-out requests must be rejected by the database.
+Host: the designated host email. Access is checked in PostgreSQL against the authenticated user and a confirmed email. A browser email field cannot grant host access.
 
-## Publish on GitHub
+Production database: Teacher Circle. Only the public publishable key is stored in config.js. Never add database passwords or secret/service-role keys to this repository.
 
-Push these files, including `.github/workflows/pages.yml`, to a repository's `main` branch. In repository Settings → Pages, select GitHub Actions. The included workflow publishes the site. Wait for a successful deployment and use its returned URL for Supabase's redirect configuration.
+Signed-in teachers can submit or update their own complete set of 10 choices. They can read their own saved row. Only the confirmed host can read everyone's responses. Signed-out accounts have no table privileges. The dashboard displays up to the latest 1,000 responses. Results appear in the dashboard; notification emails are not implemented.
 
-## Behavior and limits
+Email authentication and confirmation are enabled. The Site URL and allowed redirect URL point to the exact GitHub Pages URL. A host sign-in request was accepted on November 4, 2026. The host still needs to open the emailed link to complete verification. End-to-end host dashboard and teacher submission checks must be completed after sign-in.
 
-The dashboard is reached through Host dashboard. Database row-level security enforces privacy independently of the page's visibility. Responses are available in the host dashboard, not sent as notification emails. The current dashboard shows up to the latest 1,000 submissions. No live service has been configured in the initial source; until configured, email entry displays an honest setup message and does not collect answers. No sample responses are presented as real submissions.
+Important remaining setup: custom SMTP is not configured. Supabase's built-in email sender is for testing and restricts recipients. Configure a production email sender before inviting teachers.
 
-## Local preview
-
-Serve this folder with any static HTTP server. Live email and access tests require a configured Supabase project and an allowed redirect URL. Fonts and the Supabase browser library load from external CDNs.
+Publishing: GitHub Pages currently deploys from main, root directory. Commit index.html, game.css, game.js, auth.js and config.js to update the site. The earlier app.js, style.css and supabase.sql belong to the initial introduction-form design and are not loaded by the current game. game-schema.sql describes the current schema.
